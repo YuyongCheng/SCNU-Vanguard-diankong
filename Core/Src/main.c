@@ -41,7 +41,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 uint8_t Message[] = "noob\n";
-uint8_t RC_buff[18];
+extern uint8_t RC_buff[18];
+//uint8_t RC_buff[18];
 
 /* USER CODE END PD */
 

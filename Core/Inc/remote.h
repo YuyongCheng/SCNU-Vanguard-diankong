@@ -51,5 +51,4 @@ typedef struct
 	}rc;
 }RC_Ctl_t;
 
-extern uint8_t RC_buff[18];
 #endif

@@ -3,6 +3,7 @@
 #include "main.h"
 #include "string.h"
 RC_Ctl_t RC_Ctl;
+uint8_t RC_buff[18];
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 		RC_Ctl.rc.ch1 = (RC_buff[0] | RC_buff[1] << 8) & 0x07FF;
