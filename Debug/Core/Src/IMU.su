@@ -1,0 +1,4 @@
+../Core/Src/IMU.c:7:9:BMI088_read_Accel	24	static
+../Core/Src/IMU.c:17:6:BMI088_read_Gyro	32	static
+../Core/Src/IMU.c:40:6:BMI088_write_byte	16	static
+../Core/Src/IMU.c:67:6:BMI088_init	8	static
