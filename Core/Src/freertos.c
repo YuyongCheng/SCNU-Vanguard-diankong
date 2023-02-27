@@ -44,7 +44,7 @@
 extern uint8_t Message[];
 uint8_t uart_rxbuff;//仅供测试
 float speed_target_arr[] = {0,30,-15,15};
-float angle_target_arr[] = {0,45,30,90,180,150,180};   //测试�??
+float angle_target_arr[] = {0,45,30,90,180,150,180};   //测试�???
 int spcount = 0;
 /* USER CODE END PD */
 
@@ -68,7 +68,7 @@ const osThreadAttr_t defaultTask_attributes = {
 osThreadId_t SendMessageHandle;
 const osThreadAttr_t SendMessage_attributes = {
   .name = "SendMessage",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for ReceiveMessage */
@@ -293,7 +293,6 @@ void startReceiveMessage(void *argument)
 /* USER CODE END Header_fun_ChangeTarget */
 void fun_ChangeTarget(void *argument)
 {
-
   /* USER CODE BEGIN fun_ChangeTarget */
 
   /* Infinite loop */

@@ -61,6 +61,7 @@ extern uint8_t RC_buff[18];
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
+static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 void Can_MessageConfig(void);
 void Can_Filter1Config(void);
@@ -104,29 +105,32 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART1_UART_Init();
-  MX_USART3_UART_Init();
   MX_CAN1_Init();
-  MX_TIM2_Init();
   MX_TIM1_Init();
   MX_TIM5_Init();
   MX_SPI1_Init();
+  MX_USART3_UART_Init();
+
+  /* Initialize interrupts */
+  MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
   Can_MessageConfig();
   Can_Filter1Config();
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_CAN_Start(&hcan1);
-  HAL_TIM_Base_Start_IT(&htim2);
+//  HAL_TIM_Base_Start_IT(&htim2);
   PID_Clear(&PID_Motor_Speed[0]);
   PID_Clear(&PID_Motor_Angle[0]);
   PID_Init();
   KalmanFilter_Init(&Klm_Motor[0]);
-  HAL_UART_Receive_DMA(&huart3, RC_buff, RC_FRAME_LENGTH);//初始化DMA
-  __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);//IDLE 中断使能
 //  PWM_Init();
   BMI088_init();
   Motor[Motor_Yaw_ID].target_angle = 60;
   Motor[Motor_Pitch_ID].target_angle = 100;
   Motor[Motor_Yaw_ID].target_speed = 0;
+
+  HAL_UART_Receive_DMA(&huart3, RC_buff, RC_FRAME_LENGTH);//初始化DMA
+  __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);//IDLE 中断使能
   HAL_Delay(1000);
 
   /* USER CODE END 2 */
@@ -175,7 +179,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 6;
-  RCC_OscInitStruct.PLL.PLLN = 80;
+  RCC_OscInitStruct.PLL.PLLN = 160;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -189,24 +193,29 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }
 }
 
+/**
+  * @brief NVIC Configuration.
+  * @retval None
+  */
+static void MX_NVIC_Init(void)
+{
+  /* USART3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(USART3_IRQn, 6, 0);
+  HAL_NVIC_EnableIRQ(USART3_IRQn);
+}
+
 /* USER CODE BEGIN 4 */
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	if(htim->Instance == TIM2)
-	{
-//		HAL_UART_Transmit_DMA(&huart1, Can_RxData, sizeof(Can_RxData));
-	}
-}
+
 void PWM_Init()
 {
 	  HAL_TIM_Base_Start(&htim1);
@@ -222,7 +231,7 @@ void PWM_Init()
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,500);
 	  HAL_Delay(1650);
 //}
-//void SPEED_SET(int speed){//速度极限为1999，但是禁止如此使用，极易损坏发射管，曾经测试的时候一次发射就打废一对摩擦轮了且造成了钢板损坏，所以速度建议在1001~1600左右。
+//void SPEED_SET(int speed){//速度极限�???1999，但是禁止如此使用，极易损坏发射管，曾经测试的时候一次发射就打废�???对摩擦轮了且造成了钢板损坏，�???以�?�度建议�???1001~1600左右�???
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,650);
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,650);
 	  HAL_Delay(500);
@@ -232,6 +241,27 @@ void PWM_Init()
 //	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
 }
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM6 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM6) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

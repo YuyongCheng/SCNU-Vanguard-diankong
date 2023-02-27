@@ -134,7 +134,7 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 /* USER CODE BEGIN 1 */
 void Can_MessageConfig(void)
 {
-	for(int i=0; i<8; i++)           //无特殊情况批量设置
+	for(int i=0; i<8; i++)           //无特殊情况批量设�?
 	{
 		Can_cmdHeader[i].ExtId =   0x0;
 		Can_cmdHeader[i].IDE = CAN_ID_STD;
@@ -195,7 +195,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			Motor[Motor_Pitch_ID].angle = ((Can_RxData[0]<<8) + Can_RxData[1])/32;
 			Motor[Motor_Pitch_ID].current = (uint16_t)(Can_RxData[4]<<8) + Can_RxData[5];
 			Motor[Motor_Pitch_ID].temp = Can_RxData[6];
-		    //�??6020反馈的角度�??0~8191转换至0~255
+		    //�???6020反馈的角度�??0~8191转换�?0~255
 		break;
 
 		case 0x20A:
@@ -203,7 +203,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			Motor[Motor_Yaw_ID].angle = ((Can_RxData[0]<<8) + Can_RxData[1])/32;
 			Motor[Motor_Yaw_ID].current = (uint16_t)(Can_RxData[4]<<8) + Can_RxData[5];
 			Motor[Motor_Yaw_ID].temp = Can_RxData[6];
-			 //�??6020反馈的角度�??0~8191转换至0~255
+			 //�???6020反馈的角度�??0~8191转换�?0~255
 		break;
 
 		case 0x207:
