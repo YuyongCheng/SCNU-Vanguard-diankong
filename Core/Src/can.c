@@ -134,7 +134,7 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 /* USER CODE BEGIN 1 */
 void Can_MessageConfig(void)
 {
-	for(int i=0; i<8; i++)           //无特殊情况批量设�?
+	for(int i=0; i<8; i++)           //无特殊情况批量设�???
 	{
 		Can_cmdHeader[i].ExtId =   0x0;
 		Can_cmdHeader[i].IDE = CAN_ID_STD;
@@ -157,11 +157,11 @@ void Can_MessageConfig(void)
 	Can_cmdHeader[Motor_RightFront_ID].StdId = 0x200;
 	Can_recHeader[Motor_RightFront_ID].StdId = 0x204;
 
-	Can_cmdHeader[Motor_Pitch_ID].StdId = 0x2FF;
-    Can_recHeader[Motor_Pitch_ID].StdId = 0x209;           //pitch id=5
+	Can_cmdHeader[Motor_Pitch_ID].StdId = 0x1FF;
+    Can_recHeader[Motor_Pitch_ID].StdId = 0x205;           //pitch id=1
 
-	Can_cmdHeader[Motor_Yaw_ID].StdId = 0x2FF;
-    Can_recHeader[Motor_Yaw_ID].StdId = 0x20A;             //yaw id=6
+	Can_cmdHeader[Motor_Yaw_ID].StdId = 0x1FF;
+    Can_recHeader[Motor_Yaw_ID].StdId = 0x206;             //yaw id=2
 
 	Can_cmdHeader[Motor_AmmoFeed_ID].StdId = 0x1FF;
     Can_recHeader[Motor_AmmoFeed_ID].StdId = 0x207;               //c610 id =7
@@ -190,28 +190,25 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &sCan_RxHeader, Can_RxData);
 		switch(sCan_RxHeader.StdId)
 		{
-		case 0x209:
+		case 0x205:
 			Motor[Motor_Pitch_ID].speed = (uint16_t)(Can_RxData[2]<<8) + Can_RxData[3];
-			Motor[Motor_Pitch_ID].angle = ((Can_RxData[0]<<8) + Can_RxData[1])/32;
+			Motor[Motor_Pitch_ID].angle = ((Can_RxData[0]<<8) + Can_RxData[1]);
 			Motor[Motor_Pitch_ID].current = (uint16_t)(Can_RxData[4]<<8) + Can_RxData[5];
 			Motor[Motor_Pitch_ID].temp = Can_RxData[6];
-		    //�???6020反馈的角度�??0~8191转换�?0~255
 		break;
 
-		case 0x20A:
+		case 0x206:
 			Motor[Motor_Yaw_ID].speed = (uint16_t)(Can_RxData[2]<<8) + Can_RxData[3];
-			Motor[Motor_Yaw_ID].angle = ((Can_RxData[0]<<8) + Can_RxData[1])/32;
+			Motor[Motor_Yaw_ID].angle = ((Can_RxData[0]<<8) + Can_RxData[1]);
 			Motor[Motor_Yaw_ID].current = (uint16_t)(Can_RxData[4]<<8) + Can_RxData[5];
 			Motor[Motor_Yaw_ID].temp = Can_RxData[6];
-			 //�???6020反馈的角度�??0~8191转换�?0~255
+
 		break;
 
 		case 0x207:
 		     Motor[Motor_AmmoFeed_ID].speed = (uint16_t)(Can_RxData[2]<<8) + Can_RxData[3];
 		break;
 		}
-
-
 
 
 	}

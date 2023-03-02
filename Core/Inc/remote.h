@@ -50,5 +50,5 @@ typedef struct
     int16_t wheel;
 	}rc;
 }RC_Ctl_t;
-
+extern RC_Ctl_t RC_Ctl;
 #endif

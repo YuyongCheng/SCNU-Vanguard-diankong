@@ -32,6 +32,7 @@
 #include "tim.h"
 #include "spi.h"
 #include "IMU.h"
+#include "remote.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,9 +43,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 extern uint8_t Message[];
-uint8_t uart_rxbuff;//仅供测试
-float speed_target_arr[] = {0,30,-15,15};
-float angle_target_arr[] = {0,45,30,90,180,150,180};   //测试�???
 int spcount = 0;
 /* USER CODE END PD */
 
@@ -69,7 +67,7 @@ osThreadId_t SendMessageHandle;
 const osThreadAttr_t SendMessage_attributes = {
   .name = "SendMessage",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for ReceiveMessage */
 osThreadId_t ReceiveMessageHandle;
@@ -83,21 +81,28 @@ osThreadId_t ChangeTargetHandle;
 const osThreadAttr_t ChangeTarget_attributes = {
   .name = "ChangeTarget",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for PWM_Test */
 osThreadId_t PWM_TestHandle;
 const osThreadAttr_t PWM_Test_attributes = {
   .name = "PWM_Test",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal5,
+  .priority = (osPriority_t) osPriorityBelowNormal6,
 };
 /* Definitions for IMU_Read */
 osThreadId_t IMU_ReadHandle;
 const osThreadAttr_t IMU_Read_attributes = {
   .name = "IMU_Read",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal1,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for Chassis_task */
+osThreadId_t Chassis_taskHandle;
+const osThreadAttr_t Chassis_task_attributes = {
+  .name = "Chassis_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -111,6 +116,7 @@ void startReceiveMessage(void *argument);
 void fun_ChangeTarget(void *argument);
 void Start_PWM_Test(void *argument);
 void StartIMU_Read(void *argument);
+void Start_Chassis_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -159,6 +165,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of IMU_Read */
   IMU_ReadHandle = osThreadNew(StartIMU_Read, NULL, &IMU_Read_attributes);
 
+  /* creation of Chassis_task */
+  Chassis_taskHandle = osThreadNew(Start_Chassis_task, NULL, &Chassis_task_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -197,44 +206,35 @@ void StartDefaultTask(void *argument)
 void start_SendMessage(void *argument)
 {
   /* USER CODE BEGIN start_SendMessage */
-	static int16_t temp;
+	static int16_t temp_yaw, temp_pitch, temp_ammofeed;
   /* Infinite loop */
   for(;;)
   {
 
-//	  PID_Origin(&PID_Motor_Angle[Motor_Pitch_ID], Motor[Motor_Pitch_ID].angle, Motor[Motor_Pitch_ID].target);
-//   	  Can_TxData[0] = (PID_Motor_Angle[Motor_Pitch_ID].Output>>8);
-//   	  Can_TxData[1] = PID_Motor_Angle[Motor_Pitch_ID].Output;
-
 	  PID_Origin(&PID_Motor_Angle[Motor_Pitch_ID], Motor[Motor_Pitch_ID].angle, Motor[Motor_Pitch_ID].target_angle);
-   	  PID_Incr(&PID_Motor_Speed[Motor_Pitch_ID], Motor[Motor_Pitch_ID].speed, PID_Motor_Angle[Motor_Pitch_ID].Output);
-   	  temp += PID_Motor_Speed[Motor_Pitch_ID].Output;
-   	  Can_TxData[0] = temp>>8;
-   	  Can_TxData[1] = temp;
+	  PID_Origin(&PID_Motor_Angle[Motor_Yaw_ID], Motor[Motor_Yaw_ID].angle, Motor[Motor_Yaw_ID].target_angle);
 
-   	  PID_Origin(&PID_Motor_Angle[Motor_Yaw_ID], Motor[Motor_Yaw_ID].angle, Motor[Motor_Yaw_ID].target_angle);
-   	  Can_TxData[2] = (PID_Motor_Angle[Motor_Yaw_ID].Output>>8);
-   	  Can_TxData[3] = PID_Motor_Angle[Motor_Yaw_ID].Output;
+	  PID_Incr(&PID_Motor_Speed[Motor_AmmoFeed_ID],Motor[Motor_AmmoFeed_ID].speed,Motor[Motor_AmmoFeed_ID].target_speed);
+      PID_Incr(&PID_Motor_Speed[Motor_Yaw_ID], Motor[Motor_Yaw_ID].speed, PID_Motor_Angle[Motor_Yaw_ID].Output);
+	  PID_Incr(&PID_Motor_Speed[Motor_Pitch_ID],Motor[Motor_Pitch_ID].speed,PID_Motor_Angle[Motor_Pitch_ID].Output);
 
-   	  HAL_CAN_AddTxMessage(&hcan1, &Can_cmdHeader[Motor_Yaw_ID], Can_TxData, (uint32_t*)CAN_TX_MAILBOX0);
+	  temp_yaw += PID_Motor_Speed[Motor_Yaw_ID].Output;
+	  temp_pitch += PID_Motor_Speed[Motor_Pitch_ID].Output;
+	  temp_ammofeed += PID_Motor_Speed[Motor_AmmoFeed_ID].Output;
 
-//	  PID_Origin(&PID_Motor_Speed[0]);
-//	  Can_TxData[0] = (PID_Motor_Speed[0].Output>>8);
-//      Can_TxData[1] = PID_Motor_Speed[0].Output;
+	  Can_TxData[0] = (temp_pitch>>8);
+	  Can_TxData[1] = temp_pitch;
 
+	  Can_TxData[2] = (temp_yaw>>8);
+	  Can_TxData[3] = temp_yaw;
 
+	  Can_TxData[4] = (temp_ammofeed>>8);
+	  Can_TxData[5] = temp_ammofeed;
 
-//   	  HAL_CAN_AddTxMessage(&hcan1, &Can_6020cmdHeader, Can_TxData, (uint32_t*)CAN_TX_MAILBOX0);
+	  HAL_CAN_AddTxMessage(&hcan1, &Can_cmdHeader[Motor_Pitch_ID], Can_TxData, (uint32_t*)CAN_TX_MAILBOX0);
+	  HAL_CAN_AddTxMessage(&hcan1,&Can_cmdHeader[Motor_LeftFront_ID],Can_TxData,(uint32_t*)CAN_TX_MAILBOX0);
 
-
-
-//	  PID_Origin(&PID_Motor_Speed[2]);
-//	  Can_TxData[4] = (PID_Motor_Speed[2].Output>>8);
-//	  Can_TxData[5] = PID_Motor_Speed[2].Output;
-//  	  HAL_CAN_AddTxMessage(&hcan1, &Can_2006cmdHeader, Can_TxData, (uint32_t*)CAN_TX_MAILBOX0);
-
-
-    osDelay(5);
+	  osDelay(5);
   }
   /* USER CODE END start_SendMessage */
 }
@@ -249,17 +249,12 @@ void start_SendMessage(void *argument)
 void startReceiveMessage(void *argument)
 {
   /* USER CODE BEGIN startReceiveMessage */
-	int data_size = 0;
+
   /* Infinite loop */
   for(;;)
   {
-	if(HAL_UART_GetState(&huart1) ==  HAL_UART_STATE_READY)
-	{
 
-		Message[0] = Motor[Motor_Pitch_ID].angle;
-		Message[1] = Motor[Motor_Yaw_ID].angle;
-		Message[2] = uart_rxbuff;
-		data_size = 3;
+
 
 //		Message[0] = PID_Motor_Speed[1].Output>>8;
 //		Message[1] = PID_Motor_Speed[1].Output;
@@ -276,10 +271,10 @@ void startReceiveMessage(void *argument)
 //		Message[5] = BMI088_Gyro.z_LSB_Data;
 //		data_size = 6;
 
-		HAL_UART_Transmit_DMA(&huart1, Message, data_size);
-	}
 
-    osDelay(50);
+
+
+    osDelay(5);
   }
   /* USER CODE END startReceiveMessage */
 }
@@ -298,28 +293,11 @@ void fun_ChangeTarget(void *argument)
   /* Infinite loop */
 	for(;;)
   {
-//	if(++spcount > 3)
-//	{
-//		spcount = 0;
-//	}
-//	PID_Motor_Speed[0].Target_now = speed_target_arr[spcount];
-//	if(speed_target_arr[spcount] < 0 )
-//	{
-//		PID_Motor_Speed[0].Target_now--;
-//	}
+		Motor[6].target_angle += RC_Ctl.rc.ch3 >>3;
+		if(Motor[6].target_angle >= 8192) Motor[2].target_angle -=8192;
+		if(Motor[6].target_angle <= 0) Motor[2].target_angle += 8192;
 
-//	  if(++spcount > 6)
-//	{
-//		spcount = 0;
-//	}
-//	PID_Motor_Angle[0].Target_now = angle_target_arr[spcount];
-//	if(angle_target_arr[spcount] < 0 )
-//	{
-//		PID_Motor_Angle[0].Target_now--;
-//	}
-//		osDelay(2000);
-//	  PID_Motor_Speed[2].Target_now = 900;
-
+		osDelay(5);
   }
 
 
@@ -374,6 +352,24 @@ void StartIMU_Read(void *argument)
     osDelay(5);
   }
   /* USER CODE END StartIMU_Read */
+}
+
+/* USER CODE BEGIN Header_Start_Chassis_task */
+/**
+* @brief Function implementing the Chassis_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_Chassis_task */
+void Start_Chassis_task(void *argument)
+{
+  /* USER CODE BEGIN Start_Chassis_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(5);
+  }
+  /* USER CODE END Start_Chassis_task */
 }
 
 /* Private application code --------------------------------------------------*/

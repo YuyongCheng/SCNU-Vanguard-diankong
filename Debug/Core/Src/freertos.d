@@ -42,7 +42,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  ../Core/Inc/usart.h ../Core/Inc/main.h ../Core/Inc/can.h \
  ../Core/Inc/pid.h ../Core/Inc/kalman.h ../Core/Inc/tim.h \
- ../Core/Inc/spi.h ../Core/Inc/IMU.h
+ ../Core/Inc/spi.h ../Core/Inc/IMU.h ../Core/Inc/remote.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -93,3 +93,4 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Inc/tim.h:
 ../Core/Inc/spi.h:
 ../Core/Inc/IMU.h:
+../Core/Inc/remote.h:

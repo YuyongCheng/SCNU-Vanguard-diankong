@@ -118,7 +118,6 @@ int main(void)
   Can_Filter1Config();
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_CAN_Start(&hcan1);
-//  HAL_TIM_Base_Start_IT(&htim2);
   PID_Clear(&PID_Motor_Speed[0]);
   PID_Clear(&PID_Motor_Angle[0]);
   PID_Init();
@@ -147,6 +146,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	  HAL_GPIO_TogglePin(LED_G_GPIO_Port, LED_G_Pin);
+	  HAL_Delay(500);
 
 
 
@@ -231,7 +233,7 @@ void PWM_Init()
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,500);
 	  HAL_Delay(1650);
 //}
-//void SPEED_SET(int speed){//速度极限�???1999，但是禁止如此使用，极易损坏发射管，曾经测试的时候一次发射就打废�???对摩擦轮了且造成了钢板损坏，�???以�?�度建议�???1001~1600左右�???
+//void SPEED_SET(int speed){//速度极限�??????1999，但是禁止如此使用，极易损坏发射管，曾经测试的时候一次发射就打废�??????对摩擦轮了且造成了钢板损坏，�??????以�?�度建议�??????1001~1600左右�??????
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,650);
 	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,650);
 	  HAL_Delay(500);

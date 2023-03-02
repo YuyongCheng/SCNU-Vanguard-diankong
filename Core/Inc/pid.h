@@ -17,7 +17,7 @@ typedef struct
 	float Err_now;
 	float Err_sum;
 	float Err_diff;
-	int16_t Output;
+	float Output;
 	float Output_Max;
 	float Err_sum_Max;
 	int PID_Type;
@@ -25,8 +25,8 @@ typedef struct
 typedef struct
 {
 	uint16_t angle;
-	uint16_t speed;
-	uint16_t current;
+	int16_t speed;
+	int16_t current;
 	uint8_t temp;          //温度
 	int can_id;
 	float target_speed;
