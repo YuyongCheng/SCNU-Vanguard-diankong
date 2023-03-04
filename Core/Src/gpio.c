@@ -76,6 +76,12 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(CS1_Accel_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = Ammo_Counter_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(Ammo_Counter_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = CS1_Gyro_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;

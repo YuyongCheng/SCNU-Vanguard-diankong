@@ -65,6 +65,8 @@ void Error_Handler(void);
 #define LED_B_GPIO_Port GPIOH
 #define CS1_Accel_Pin GPIO_PIN_4
 #define CS1_Accel_GPIO_Port GPIOA
+#define Ammo_Counter_Pin GPIO_PIN_12
+#define Ammo_Counter_GPIO_Port GPIOB
 #define CS1_Gyro_Pin GPIO_PIN_0
 #define CS1_Gyro_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
@@ -75,6 +77,7 @@ void Error_Handler(void);
 #define Motor_Pitch_ID 5
 #define Motor_Yaw_ID 6
 #define Motor_AmmoFeed_ID 7            //拨弹电机
+#define Chassis_Angle_ID 0
 
 #define  RC_FRAME_LENGTH 18
 #define  SBUS_RX_BUF_NUM 36

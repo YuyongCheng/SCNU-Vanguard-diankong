@@ -1,0 +1,6 @@
+../Core/Src/Chassis.c:10:6:Chassis_Ctrl	16	static
+../Core/Src/Chassis.c:27:6:Chassis_Move	40	static
+../Core/Src/Chassis.c:48:6:Chassis_PowerCtrl	40	static
+../Core/Src/Chassis.c:72:6:Chassis_Follow	8	static
+../Core/Src/Chassis.c:79:6:Chassis_Swing	4	static
+../Core/Src/Chassis.c:89:6:Chassis_angleTransform	32	static

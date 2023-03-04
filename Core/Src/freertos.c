@@ -33,6 +33,7 @@
 #include "spi.h"
 #include "IMU.h"
 #include "remote.h"
+#include "Chassis.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -232,9 +233,19 @@ void start_SendMessage(void *argument)
 	  Can_TxData[5] = temp_ammofeed;
 
 	  HAL_CAN_AddTxMessage(&hcan1, &Can_cmdHeader[Motor_Pitch_ID], Can_TxData, (uint32_t*)CAN_TX_MAILBOX0);
-	  HAL_CAN_AddTxMessage(&hcan1,&Can_cmdHeader[Motor_LeftFront_ID],Can_TxData,(uint32_t*)CAN_TX_MAILBOX0);
+	  //osDelay(1);
+	  Chassis_Move();
+	  Can_TxData[0] = Chassis_ctrl[0]>>8;
+	  Can_TxData[1] = Chassis_ctrl[0];
+ 	  Can_TxData[2] = Chassis_ctrl[1]>>8;
+ 	  Can_TxData[3] = Chassis_ctrl[1];
+ 	  Can_TxData[4] = Chassis_ctrl[2]>>8;
+ 	  Can_TxData[5] = Chassis_ctrl[2];
+ 	  Can_TxData[6] = Chassis_ctrl[3]>>8;
+ 	  Can_TxData[7] = Chassis_ctrl[3];
 
-	  osDelay(5);
+	  HAL_CAN_AddTxMessage(&hcan1,&Can_cmdHeader[Motor_LeftFront_ID],Can_TxData,(uint32_t*)CAN_TX_MAILBOX0);
+	  osDelay(1);
   }
   /* USER CODE END start_SendMessage */
 }
@@ -249,19 +260,11 @@ void start_SendMessage(void *argument)
 void startReceiveMessage(void *argument)
 {
   /* USER CODE BEGIN startReceiveMessage */
-
+	uint8_t ammo_count=0, ammo_temp = 0;
+	GPIO_PinState pinstate = GPIO_PIN_SET;
   /* Infinite loop */
   for(;;)
   {
-
-
-
-//		Message[0] = PID_Motor_Speed[1].Output>>8;
-//		Message[1] = PID_Motor_Speed[1].Output;
-//		Message[2] = PID_Motor_Speed[1].Val_now;
-//		Message[3] = PID_Motor_Speed[1].Target_now;
-//		Message[4] = (uint16_t)KalmanFilter(&Klm_Motor[0], PID_Motor_Speed[0].Val_now);
-//		data_size = 4;
 
 //		Message[0] = BMI088_Gyro.x_MSB_Data;
 //		Message[1] = BMI088_Gyro.x_LSB_Data;
@@ -271,8 +274,17 @@ void startReceiveMessage(void *argument)
 //		Message[5] = BMI088_Gyro.z_LSB_Data;
 //		data_size = 6;
 
-
-
+	  if(HAL_GPIO_ReadPin(Ammo_Counter_GPIO_Port, Ammo_Counter_Pin) != pinstate)
+	  {
+		  pinstate = !pinstate;
+		  ammo_temp++;
+	  }
+	  if(ammo_temp >=2)
+	  {
+		  ammo_count++;
+		  ammo_temp = 0;
+	  }
+	  HAL_UART_Transmit(&huart1, &ammo_count, 1, 100);
 
     osDelay(5);
   }
@@ -290,14 +302,35 @@ void fun_ChangeTarget(void *argument)
 {
   /* USER CODE BEGIN fun_ChangeTarget */
 
+
   /* Infinite loop */
 	for(;;)
   {
-		Motor[6].target_angle += RC_Ctl.rc.ch3 >>3;
-		if(Motor[6].target_angle >= 8192) Motor[2].target_angle -=8192;
-		if(Motor[6].target_angle <= 0) Motor[2].target_angle += 8192;
+//		Motor[6].target_angle = RC_Ctl.rc.ch3*2 + 6144;
+//		if(Motor[6].target_angle >= 8192) Motor[6].target_angle -=8192;
+//		if(Motor[6].target_angle <= 0) Motor[6].target_angle += 8192;
+//		Motor[5].target_angle = (RC_Ctl.rc.ch4 >> 1) + 3300;
+		//omega = -RC_Ctl.rc.ch3/600*0.8;
+		speed_x = RC_Ctl.rc.ch2/600*0.3;
+		speed_y = RC_Ctl.rc.ch1/600*0.3;
+		Motor[Motor_Yaw_ID].target_angle -= (RC_Ctl.rc.ch3>>5);
+		Motor[Motor_Pitch_ID].target_angle += (RC_Ctl.rc.ch4>>5);
+		if(Motor[6].target_angle >= 8192) Motor[6].target_angle -=8192;
+		if(Motor[6].target_angle <= 0) Motor[6].target_angle += 8192;
+		if(Motor[Motor_Pitch_ID].target_angle > 3700)
+			Motor[Motor_Pitch_ID].target_angle = 3700;
+		if(Motor[Motor_Pitch_ID].target_angle < 2900)
+			Motor[Motor_Pitch_ID].target_angle = 2900;
+		if(RC_Ctl.rc.sw1 == 2)
+		{
+			Motor[Motor_AmmoFeed_ID].target_speed = 1200;
+		}
+		else
+		{
+			Motor[Motor_AmmoFeed_ID].target_speed = 0;
+		}
 
-		osDelay(5);
+     osDelay(5);
   }
 
 

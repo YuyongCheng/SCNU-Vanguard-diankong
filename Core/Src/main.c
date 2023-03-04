@@ -122,10 +122,10 @@ int main(void)
   PID_Clear(&PID_Motor_Angle[0]);
   PID_Init();
   KalmanFilter_Init(&Klm_Motor[0]);
-//  PWM_Init();
+  PWM_Init();
   BMI088_init();
-  Motor[Motor_Yaw_ID].target_angle = 60;
-  Motor[Motor_Pitch_ID].target_angle = 100;
+  Motor[Motor_Yaw_ID].target_angle = 6144;
+  Motor[Motor_Pitch_ID].target_angle = 3300;
   Motor[Motor_Yaw_ID].target_speed = 0;
 
   HAL_UART_Receive_DMA(&huart3, RC_buff, RC_FRAME_LENGTH);//初始化DMA
@@ -228,14 +228,14 @@ void PWM_Init()
 //
 	  HAL_Delay(100);
 //void SPEED_INIT(int speed){
-	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,500);
+	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,1000);
 	  HAL_Delay(1650);
-	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,500);
+	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,1000);
 	  HAL_Delay(1650);
 //}
-//void SPEED_SET(int speed){//速度极限�??????1999，但是禁止如此使用，极易损坏发射管，曾经测试的时候一次发射就打废�??????对摩擦轮了且造成了钢板损坏，�??????以�?�度建议�??????1001~1600左右�??????
-	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,650);
-	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,650);
+//void SPEED_SET(int speed){//速度极限�???????1999，但是禁止如此使用，极易损坏发射管，曾经测试的时候一次发射就打废�???????对摩擦轮了且造成了钢板损坏，�???????以�?�度建议�???????1001~1600左右�???????
+	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,1200);
+	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,1200);
 	  HAL_Delay(500);
 //	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,0);
 //	  __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,0);
