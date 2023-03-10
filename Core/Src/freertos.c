@@ -34,6 +34,8 @@
 #include "IMU.h"
 #include "remote.h"
 #include "Chassis.h"
+#include "MahonyAHRS.h"
+#include "math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -265,15 +267,6 @@ void startReceiveMessage(void *argument)
   /* Infinite loop */
   for(;;)
   {
-
-//		Message[0] = BMI088_Gyro.x_MSB_Data;
-//		Message[1] = BMI088_Gyro.x_LSB_Data;
-//		Message[2] = BMI088_Gyro.y_MSB_Data;
-//		Message[3] = BMI088_Gyro.y_LSB_Data;
-//		Message[4] = BMI088_Gyro.z_MSB_Data;
-//		Message[5] = BMI088_Gyro.z_LSB_Data;
-//		data_size = 6;
-
 	  if(HAL_GPIO_ReadPin(Ammo_Counter_GPIO_Port, Ammo_Counter_Pin) != pinstate)
 	  {
 		  pinstate = !pinstate;
@@ -302,7 +295,6 @@ void fun_ChangeTarget(void *argument)
 {
   /* USER CODE BEGIN fun_ChangeTarget */
 
-
   /* Infinite loop */
 	for(;;)
   {
@@ -330,7 +322,7 @@ void fun_ChangeTarget(void *argument)
 			Motor[Motor_AmmoFeed_ID].target_speed = 0;
 		}
 
-     osDelay(5);
+		osDelay(5);
   }
 
 
@@ -381,8 +373,26 @@ void StartIMU_Read(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	 BMI088_read_Gyro(&BMI088_Gyro);
-    osDelay(5);
+	 BMI088_read_Gyro(&imu_data);
+	 BMI088_read_Accel(&imu_data);
+	 for(int i=0;i<3;i++)
+	 {
+//		 if(fabs(imu_data.gyro[i]) > 75)
+//			 imu_data.angle[i] += imu_data.gyro[i]*0.01/34.497;//*0.00106526443603169529841533860381f;
+
+		 imu_gyro[i] = imu_data.gyro[i]/65.536;
+		 imu_accel[i] = imu_data.accel[i]*0.0008974;
+	 }
+	 MahonyAHRSupdateIMU(imu_data.angle_q, imu_gyro[0], imu_gyro[1], imu_gyro[2], imu_accel[0], imu_accel[1], imu_accel[2]);
+	 imu_data.angle[0] = atan2f(2.0f*(imu_data.angle_q[0]*imu_data.angle_q[3]+imu_data.angle_q[1]*imu_data.angle_q[2]), 2.0f*(imu_data.angle_q[0]*imu_data.angle_q[0]+imu_data.angle_q[1]*imu_data.angle_q[1])-1.0f);
+	 imu_data.angle[1] = asinf(-2.0f*(imu_data.angle_q[1]*imu_data.angle_q[3]-imu_data.angle_q[0]*imu_data.angle_q[2]));
+	 imu_data.angle[2] = atan2f(2.0f*(imu_data.angle_q[0]*imu_data.angle_q[1]+imu_data.angle_q[2]*imu_data.angle_q[3]),2.0f*(imu_data.angle_q[0]*imu_data.angle_q[0]+imu_data.angle_q[3]*imu_data.angle_q[3])-1.0f);
+
+
+		 IMU_fliter(&imu_fliter[0], imu_data.angle[0], imu_gyro[0]);
+		 imu_data.angle[0] = imu_fliter[0].output;
+
+    osDelay(10);
   }
   /* USER CODE END StartIMU_Read */
 }

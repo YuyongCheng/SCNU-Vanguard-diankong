@@ -36,12 +36,11 @@
 
 typedef struct
 {
-	uint8_t x_MSB_Data;
-	uint8_t x_LSB_Data;
-	uint8_t y_MSB_Data;
-	uint8_t y_LSB_Data;
-	uint8_t z_MSB_Data;
-	uint8_t z_LSB_Data;
+	int16_t gyro[3];//陀螺仪
+	int16_t accel[3];//加速度计
+	int16_t mag[3];//磁力计
+	float angle_q[4];
+	float angle[3];
 	uint8_t temp;
 	int sensitivity;
 
@@ -51,9 +50,10 @@ typedef enum
 	accel = 0,
 	gyro = 1
 }accel_or_gyro;
-extern IMU_TypeDef BMI088_Accel, BMI088_Gyro;
+extern IMU_TypeDef imu_data;
+extern float imu_gyro[3],imu_accel[3];
 extern void BMI088_read_Gyro(IMU_TypeDef *imu);
-extern uint8_t BMI088_read_Accel(uint8_t const reg);
+extern void BMI088_read_Accel(IMU_TypeDef *imu);
 extern void BMI088_init();
 
 #endif

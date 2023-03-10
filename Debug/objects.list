@@ -1,5 +1,6 @@
 "./Core/Src/Chassis.o"
 "./Core/Src/IMU.o"
+"./Core/Src/MahonyAHRS.o"
 "./Core/Src/can.o"
 "./Core/Src/dma.o"
 "./Core/Src/freertos.o"

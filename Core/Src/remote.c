@@ -2,6 +2,7 @@
 #include "usart.h"
 #include "main.h"
 #include "string.h"
+#include "math.h"
 RC_Ctl_t RC_Ctl;
 uint8_t RC_buff[18];
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)

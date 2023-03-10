@@ -43,7 +43,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Core/Inc/usart.h ../Core/Inc/main.h ../Core/Inc/can.h \
  ../Core/Inc/pid.h ../Core/Inc/kalman.h ../Core/Inc/tim.h \
  ../Core/Inc/spi.h ../Core/Inc/IMU.h ../Core/Inc/remote.h \
- ../Core/Inc/Chassis.h ../Core/Inc/pid.h
+ ../Core/Inc/Chassis.h ../Core/Inc/pid.h ../Core/Inc/MahonyAHRS.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -97,3 +97,4 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Inc/remote.h:
 ../Core/Inc/Chassis.h:
 ../Core/Inc/pid.h:
+../Core/Inc/MahonyAHRS.h:

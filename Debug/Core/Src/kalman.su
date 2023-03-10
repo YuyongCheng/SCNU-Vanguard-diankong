@@ -1,2 +1,4 @@
-../Core/Src/kalman.c:2:6:KalmanFilter_Init	16	static
-../Core/Src/kalman.c:11:7:KalmanFilter	16	static
+../Core/Src/kalman.c:3:6:KalmanFilter_Init	16	static
+../Core/Src/kalman.c:12:7:KalmanFilter	16	static
+../Core/Src/kalman.c:28:6:IMU_fliter	32	static
+../Core/Src/kalman.c:53:6:IMU_fliter_Init	16	static
